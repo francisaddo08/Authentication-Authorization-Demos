@@ -1,0 +1,18 @@
+# For more info on HTTP files go to https://aka.ms/vs/httpfile
+GET http://localhost:5035
+###
+GET http://localhost:5035/login
+
+###
+GET http://localhost:5035/user
+###
+GET http://localhost:5035/loginProtected
+
+###
+GET http://localhost:5035/protected-user
+###
+GET http://localhost:5035/login-AuthService
+###
+ GET http://localhost:5035/User-AuthService
+ ###
+ GET http://localhost:5035/middleware-user
