@@ -1,0 +1,13 @@
+@HostAddress = http://localhost:5189
+
+GET {{HostAddress}}/
+Accept: application/json
+
+###
+GET {{HostAddress}}/cookie/login
+###
+GET {{HostAddress}}/cookie/getuser
+###
+GET {{HostAddress}}/cookie/protectedlogin
+###
+GET {{HostAddress}}/cookie/getprotecteduser
