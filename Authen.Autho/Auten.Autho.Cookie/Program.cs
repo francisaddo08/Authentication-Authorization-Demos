@@ -16,39 +16,41 @@ namespace Auten.Autho.Cookie
 
             var app = builder.Build();
             #region
-            app.Use((ctx, next) => {
+            //app.Use((ctx, next) => {
 
-                var cookie = ctx.Request.Headers.Cookie.FirstOrDefault(x => x.StartsWith("ProtectedAuth="));
-                if(cookie != null)
-                {
-                    var protector = ctx.RequestServices.GetRequiredService<IDataProtectionProvider>();
-                    var cookieParts = cookie.Split("=").Last();
-                    var cookieArray = cookieParts.Split(":");
-                    var key = cookieArray[0];
-                    var value = cookieArray[1];
-                    ctx.User = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { new Claim(key, value) }));
-                }
-                else
-                {
-                    ctx.User = new ClaimsPrincipal(new ClaimsIdentity());
-                }
-                return next();
-            });
+            //    var cookie = ctx.Request.Headers.Cookie.FirstOrDefault(x => x.StartsWith("ProtectedAuth="));
+            //    if(cookie != null)
+            //    {
+            //        var protector = ctx.RequestServices.GetRequiredService<IDataProtectionProvider>();
+            //        var cookieParts = cookie.Split("=").Last();
+            //        var cookieArray = cookieParts.Split(":");
+            //        var key = cookieArray[0];
+            //        var value = cookieArray[1];
+            //        ctx.User = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { new Claim(key, value) }));
+            //    }
+            //    else
+            //    {
+            //        ctx.User = new ClaimsPrincipal(new ClaimsIdentity());
+            //    }
+            //    return next();
+            //});
             #endregion
 
 
-            app.MapGet("/", () => "Hello World!");
+            app.MapGet("/", () => $"Cookie auten app is running {DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")}");
 
             #region 
             app.MapGet("/login", (HttpContext ctx) =>
             {
                 ctx.Response.Headers["set-cookie"] = "auth=usr:addo";
-                return Results.Ok("Login endpoint hit. You can implement your login logic here.");
+                return Results.Ok($"Loggedin session cookie set");
             });
             app.MapGet("/user", (HttpContext ctx) => 
-            { 
-              var cookie = ctx.Request.Headers.Cookie.FirstOrDefault(h => h.StartsWith("auth="));
-                var cookieParts = cookie?.Split("=").Last();
+            {
+                var cookie = ctx.Request.Headers.Cookie.ToList().FirstOrDefault()?.ToString();
+                var currentCookie = cookie.Contains(";")? cookie?.Split(";").Last() : cookie;
+
+                var cookieParts = currentCookie?.Split("=").Last();
                 var cookieArray = cookieParts?.Split(":");
                 var key = cookieArray?[0];
                 var value = cookieArray?[1];

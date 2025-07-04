@@ -10,7 +10,7 @@ namespace Authen.Self.Implementation.HostingExtensions
             services.AddHttpContextAccessor();
             // Register the IDataProtectionProvider
             services.AddDataProtection();
-            
+
             return services;
         }
         public static IServiceCollection AddAppilicationServices(this IServiceCollection services)
@@ -30,12 +30,17 @@ namespace Authen.Self.Implementation.HostingExtensions
         }
         public static WebApplication AddCookieEndpoints(this WebApplication app)
         {
-            app.Map("/", () => "Authen.Self.Implementation is running!");
+            app.Map("/", () =>
+            {
+                 var dateTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                return $" Server  is running on {dateTime}";
+
+            });
             #region
-            app.MapGet("cookie/login",  (CookieAuthenService cookieService, HttpContext ctx) =>
+            app.MapGet("cookie/login", (CookieAuthenService cookieService, HttpContext ctx) =>
             {
                 cookieService.SetCookie("User", "Addo");
-                return Results.Ok( new {Key = "User", Value = "Addo"});
+                return Results.Ok(new { Key = "User", Value = "Addo" });
             });
             app.MapGet("cookie/getuser", (CookieAuthenService cookieService, HttpContext ctx) =>
             {
@@ -50,25 +55,26 @@ namespace Authen.Self.Implementation.HostingExtensions
             #region
             app.MapGet("cookie/protectedlogin", (CookieAuthenService cookieService, HttpContext ctx) =>
             {
-                cookieService.SetProtectedCookie("User", "Addo");
+                cookieService.SetProtectedCookie("User=", "Addo");
                 return Results.Ok(new { Key = "User=", Value = "Addo" });
             });
             app.MapGet("cookie/getprotecteduser", (CookieAuthenService cookieService, HttpContext ctx) =>
             {
-                var user = cookieService.GetProtectedCookie();
-                if (string.IsNullOrEmpty(user))
+                if(cookieService.SetClaimsIsSuccess())
                 {
-                    return Results.NotFound("User not found in cookies.");
-                }
-                return Results.Ok(user);
+                    return Results.Ok(ctx.User.FindFirst("User")?.Value);
+                } 
+                return Results.NotFound("User not authenticated.");   
+
+           
             });
             #endregion
-            return app; 
+            return app;
         }
 
         public static WebApplication ConfigurePipeline(this WebApplication app)
         {
-           app.AddCookieEndpoints();
+            app.AddCookieEndpoints();
 
             return app;
         }
