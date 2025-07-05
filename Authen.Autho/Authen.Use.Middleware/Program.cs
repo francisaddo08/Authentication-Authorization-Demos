@@ -8,7 +8,7 @@ internal class Program
         var builder = WebApplication.CreateBuilder(args);
         // Add services to the container.
         builder.Services.AddAuthentication("Cookie")
-        .AddCookie("Cookie", options =>
+        .AddCookie("MiddlewareCookie", options =>
             {
                 options.LoginPath = "/login";
                 options.LogoutPath = "/logout";
