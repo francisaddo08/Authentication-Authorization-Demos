@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
+using Cookie.Identity.Management.Hosting;
 
 internal class Program
 {
@@ -6,11 +6,13 @@ internal class Program
     {
         var builder = WebApplication.CreateBuilder(args);
         // Add services to the container
-        builder.Services.AddAuthentication()
-        .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme);
-          var app = builder.Build(CookieAuthenticationDefaults.AuthenticationScheme);
 
-        app.MapGet("/", () => "Hello World!");
+        builder.Services.AddDotNetServices();
+
+        var app = builder.Build();
+        // Configure the HTTP request pipeline.
+        app.AddPipelines();
+        app.AddEndpoints();
 
         app.Run();
     }
