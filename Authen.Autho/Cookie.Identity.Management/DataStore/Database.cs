@@ -37,7 +37,7 @@ namespace Cookie.Identity.Management.DataStore
     {
         public required string UserName { get; set; }
         public  string PasswordHash { get; set; } = string.Empty;
-        public  List<UserClaims> Claims { get; set; } = new List<UserClaims>();
+        public  List<UserClaims> Claims { get; set; } = new List<UserClaims>(){ new UserClaims {Type = "Role", Value = "Admin"} };
 
     }
     public sealed class UserClaims

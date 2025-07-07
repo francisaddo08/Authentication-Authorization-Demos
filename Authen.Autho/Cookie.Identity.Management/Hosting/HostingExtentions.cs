@@ -7,16 +7,28 @@ namespace Cookie.Identity.Management.Hosting
 {
     public static class HostingExtentions
     {
-        public static IServiceCollection AddDotNetServices(this IServiceCollection services)
+        public static IServiceCollection ConfigureAuthentication(this IServiceCollection services)
         {
             // Add authentication services
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme);
             services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("Admin", options =>
+                {
+                    options.RequireAuthenticatedUser().AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme)
+                          .RequireClaim("Role", "Admin");
+
+
+
+                });
+
+            });
 
             return services;
         }
-     
+
         public static WebApplication AddPipelines(this WebApplication app)
         {
             app.UseAuthentication();
@@ -24,7 +36,7 @@ namespace Cookie.Identity.Management.Hosting
         }
         public static WebApplication AddEndpoints(this WebApplication app)
         {
-            
+
             app.MapGet("/", () => "Hello World!");
             app.MapGet("/register", async (string userName, string password, IPasswordHasher<User> hasher) =>
             {
@@ -55,11 +67,8 @@ namespace Cookie.Identity.Management.Hosting
                     return Results.NotFound("Bad Credentials");
                 }
                 // Create claims and sign in the user
-                var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, "Addo"),
-                new Claim(ClaimTypes.Role, "Admin")
-            };
+                var claims = user.Claims.Select(c => new Claim(c.Type, c.Value)).ToList();  
+
                 var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 var principal = new ClaimsPrincipal(identity);
                 await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
@@ -67,7 +76,15 @@ namespace Cookie.Identity.Management.Hosting
                 return Results.Ok("User logged in");
             });
 
-         
+            app.MapGet("/admin", (HttpContext context) =>
+            {
+                // Check if the user is authenticated and has the Admin role
+                if (context.User.Identity?.IsAuthenticated == true )
+                {
+                    return Results.Ok("Welcome to the admin area!");
+                }
+                return Results.Forbid();
+            }).RequireAuthorization("Admin");
 
             return app;
         }
