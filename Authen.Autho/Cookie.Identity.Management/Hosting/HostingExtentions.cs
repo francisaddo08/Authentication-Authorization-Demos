@@ -37,7 +37,13 @@ namespace Cookie.Identity.Management.Hosting
         public static WebApplication AddEndpoints(this WebApplication app)
         {
 
-            app.MapGet("/", () => "Hello World!");
+            app.MapGet("/", (HttpContext ctx) =>
+            {
+               var applicationName = app.Environment.ApplicationName;
+                var bindedUrls = app.Urls; //.FirstOrDefault() ?? "http://localhost:5000";
+
+                return Results.Ok(new {ApplcationName = applicationName, Urls = bindedUrls});
+            });
             app.MapGet("/register", async (string userName, string password, IPasswordHasher<User> hasher) =>
             {
                 // Simulate user registration
@@ -67,7 +73,7 @@ namespace Cookie.Identity.Management.Hosting
                     return Results.NotFound("Bad Credentials");
                 }
                 // Create claims and sign in the user
-                var claims = user.Claims.Select(c => new Claim(c.Type, c.Value)).ToList();  
+                var claims = user.Claims.Select(c => new Claim(c.Type, c.Value)).ToList();
 
                 var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 var principal = new ClaimsPrincipal(identity);
@@ -79,7 +85,7 @@ namespace Cookie.Identity.Management.Hosting
             app.MapGet("/admin", (HttpContext context) =>
             {
                 // Check if the user is authenticated and has the Admin role
-                if (context.User.Identity?.IsAuthenticated == true )
+                if (context.User.Identity?.IsAuthenticated == true)
                 {
                     return Results.Ok("Welcome to the admin area!");
                 }
