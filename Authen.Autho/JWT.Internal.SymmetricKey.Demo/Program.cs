@@ -16,7 +16,7 @@ internal class Program
         {
             var securityScheme = new OpenApiSecurityScheme()
             {
-                Name = "Jwt Authentication",
+                Name = "Authorization",
                 Description = "Enter your JWT Bearer token",
                 In = ParameterLocation.Header,
                 Type = SecuritySchemeType.Http,
@@ -26,7 +26,21 @@ internal class Program
 
             };
             options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, securityScheme);
-                  
+            var securityRequirement = new OpenApiSecurityRequirement();
+            var securityRequirementScheme = new OpenApiSecurityScheme()
+            {
+                Reference = new OpenApiReference()
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = JwtBearerDefaults.AuthenticationScheme
+                }
+            };
+            securityRequirement.Add(securityRequirementScheme, new string[] { });
+
+            options.AddSecurityRequirement(securityRequirement);
+
+
+
 
         });
         builder.Services.AddSingleton<JwtTokenProviderService>();
@@ -50,6 +64,7 @@ internal class Program
         builder.Services.AddAuthorization();
 
         var app = builder.Build();
+        // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
